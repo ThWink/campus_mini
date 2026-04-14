@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.campus.runner.mapper.CommentMapper">
+
+    <insert id="insert" parameterType="com.campus.runner.entity.Comment">
+        INSERT INTO comment(task_id, score, content)
+        VALUES (#{taskId}, #{score}, #{content})
+    </insert>
+
+    <select id="selectByTaskId" resultType="com.campus.runner.entity.Comment">
+        SELECT id, task_id as taskId, score, content
+        FROM comment
+        WHERE task_id = #{taskId}
+    </select>
+
+    <select id="selectAll" resultType="com.campus.runner.entity.Comment">
+        SELECT id, task_id as taskId, score, content
+        FROM comment
+    </select>
+
+</mapper>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.campus.runner.mapper.TaskMapper">
+
+    <insert id="insert" parameterType="com.campus.runner.entity.Task" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO task (publisher_id, title, description, reward, status, create_time)
+        VALUES (#{publisherId}, #{title}, #{description}, #{reward}, #{status}, NOW())
+    </insert>
+
+</mapper>
