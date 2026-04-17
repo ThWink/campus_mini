@@ -1,0 +1,32 @@
+<view class="chat-container">
+  <view class="chat-header">
+    <text class="header-title">智能跑腿助手</text>
+    <text class="clear-btn" bindtap="clearHistory">清空聊天</text>
+  </view>
+
+  <scroll-view class="message-list" scroll-y="true" scroll-into-view="{{scrollIntoView}}" enhanced="{{true}}" show-scrollbar="{{false}}">
+    <view class="welcome-msg" wx:if="{{messageList.length === 0 || (messageList.length === 1 && messageList[0].role === 'ai' && messageList[0].content.includes('你好'))}}">
+      <text class="welcome-text">🤖 你好！我是智能跑腿助手</text>
+      <text class="welcome-hint">有什么可以帮你的吗？</text>
+    </view>
+
+    <block wx:for="{{messageList}}" wx:key="index">
+      <view class="message-item {{item.role}}" id="msg-{{index}}">
+        <view class="avatar">
+          <text wx:if="{{item.role === 'ai'}}">🤖</text>
+          <text wx:else>👤</text>
+        </view>
+        <view class="bubble">
+          <text>{{item.content}}</text>
+        </view>
+      </view>
+    </block>
+  </scroll-view>
+
+  <view class="input-area">
+    <view class="input-wrapper">
+      <input class="input-box" value="{{inputValue}}" placeholder="请输入问题..." confirm-type="send" bindinput="onInput" bindconfirm="sendMessage" />
+      <view class="send-btn {{inputValue ? 'active' : ''}}" bindtap="sendMessage">发送</view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,149 @@
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #ededed;
+}
+
+.message-list {
+  flex: 1;
+  height: 0;
+  padding: 20rpx;
+  padding-bottom: 20rpx;
+  box-sizing: border-box;
+}
+
+.welcome-msg {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 200rpx;
+}
+
+.welcome-text {
+  font-size: 36rpx;
+  color: #333;
+  font-weight: bold;
+  margin-bottom: 16rpx;
+}
+
+.welcome-hint {
+  font-size: 26rpx;
+  color: #999;
+}
+
+.message-item {
+  display: flex;
+  margin-bottom: 32rpx;
+  align-items: flex-start;
+}
+
+.message-item.user {
+  flex-direction: row-reverse;
+}
+
+.avatar {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 8rpx;
+  background-color: #07c160;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36rpx;
+  flex-shrink: 0;
+}
+
+.message-item.user .avatar {
+  background-color: #07c160;
+}
+
+.message-item.ai .avatar {
+  background-color: #07c160;
+}
+
+.bubble {
+  max-width: 72%;
+  padding: 20rpx 24rpx;
+  border-radius: 8rpx;
+  font-size: 30rpx;
+  line-height: 1.4;
+  margin: 0 16rpx;
+  position: relative;
+  word-wrap: break-word;
+}
+
+.message-item.ai .bubble {
+  background-color: #ffffff;
+  color: #333;
+}
+
+.message-item.user .bubble {
+  background-color: #07c160;
+  color: #fff;
+}
+
+.bubble loading {
+  display: flex;
+  align-items: center;
+}
+
+.loading-dots text {
+  animation: blink 1.4s infinite;
+  font-size: 40rpx;
+  font-weight: bold;
+}
+
+.loading-dots text:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loading-dots text:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes blink {
+ 0%, 60%, 100% { opacity: 0; }
+ 30% { opacity: 1; }
+}
+
+.input-area {
+  flex-shrink: 0;
+  padding: 12rpx 20rpx;
+  background-color: #f7f7f7;
+  padding-bottom: calc(12rpx + env(safe-area-inset-bottom));
+}
+
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 0 12rpx 0 20rpx;
+  height: 80rpx;
+}
+
+.input-box {
+  flex: 1;
+  height: 80rpx;
+  font-size: 32rpx;
+  line-height: 80rpx;
+  caret-color: #07c160;
+}
+
+.send-btn {
+  min-width: 96rpx;
+  height: 60rpx;
+  line-height: 60rpx;
+  text-align: center;
+  font-size: 30rpx;
+  color: #999;
+  border-radius: 10rpx;
+  padding: 0 20rpx;
+}
+
+.send-btn.active {
+  background-color: #07c160;
+  color: #fff;
+}

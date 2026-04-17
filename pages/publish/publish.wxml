@@ -1,0 +1,24 @@
+<view class="container">
+  <view class="header-section">
+    <text class="page-title">发布跑腿需求</text>
+  </view>
+
+  <view class="form-card">
+    <view class="form-item">
+      <text class="label">任务名称</text>
+      <input class="input-box" placeholder="例如：帮拿外卖、代买奶茶" bindinput="inputTitle" value="{{title}}" />
+    </view>
+
+    <view class="form-item">
+      <text class="label">详细描述</text>
+      <textarea class="textarea-box" placeholder="请填写具体要求，如：地点、取件码等" bindinput="inputDesc" value="{{description}}" />
+    </view>
+
+    <view class="form-item">
+      <text class="label">悬赏金额 (元)</text>
+      <input class="input-box" type="digit" placeholder="请输入金额" bindinput="inputReward" value="{{reward}}" />
+    </view>
+
+    <button class="submit-btn" bindtap="submitTask">立即发布</button>
+  </view>
+</view>

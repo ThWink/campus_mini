@@ -1,0 +1,24 @@
+<view class="login-container">
+  <view class="header">
+    <text class="title">校园跑腿</text>
+    <text class="subtitle">Campus Runner System</text>
+  </view>
+
+  <view class="form-box">
+    <view class="input-item">
+      <text class="label">账号</text>
+      <input class="input" model:value="{{username}}" placeholder="请输入用户名" placeholder-class="placeholder" />
+    </view>
+    
+    <view class="input-item">
+      <text class="label">密码</text>
+      <input class="input" model:value="{{password}}" password placeholder="请输入密码" placeholder-class="placeholder" />
+    </view>
+
+    <button class="login-btn" bindtap="handleLogin">立即登录</button>
+    
+    <view class="footer-links">
+      <text bindtap="goToRegister">没有账号？去注册</text>
+    </view>
+  </view>
+</view>

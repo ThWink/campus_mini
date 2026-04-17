@@ -1,0 +1,50 @@
+<view class="container">
+  <view class="list-title">{{type === 'published' ? '📝 我发布的订单' : '🛵 我接取的任务'}}</view>
+
+  <view wx:if="{{orders.length === 0}}" class="empty">
+    <text class="empty-icon">📭</text>
+    <text class="empty-text">暂无订单记录</text>
+  </view>
+
+  <view class="order-item" wx:for="{{orders}}" wx:key="id">
+    <view class="item-header">
+      <view class="order-id-row">
+        <text class="order-id-label">订单号：</text>
+        <text class="order-id-value" selectable="{{true}}">{{item.id}}</text>
+      </view>
+      <view class="title-row">
+        <text class="title">{{item.title}}</text>
+        <text class="status-tag s0" wx:if="{{item.status == 0}}">待接单</text>
+        <text class="status-tag s1" wx:if="{{item.status == 1}}">配送中</text>
+        <text class="status-tag s2" wx:if="{{item.status == 2}}">已完成</text>
+      </view>
+    </view>
+
+    <view class="item-body">
+      <view class="row"><text class="label">金额：</text><text class="value price">￥{{item.reward}}</text></view>
+      <view class="row"><text class="label">详情：</text><text class="value">{{item.description}}</text></view>
+    </view>
+
+    <view class="item-footer">
+      <view class="btn-group" wx:if="{{type === 'published' && item.status == 1}}">
+        <button class="btn-confirm" bindtap="handleComplete" data-id="{{item.id}}">确认收货</button>
+      </view>
+
+      <view class="btn-group" wx:if="{{type === 'accepted' && item.status == 1}}">
+        <button class="btn-complete" bindtap="handleComplete" data-id="{{item.id}}">确认送达</button>
+      </view>
+
+      <view class="btn-group" wx:if="{{type === 'accepted' && item.status == 2}}">
+        <button class="btn-evaluate" bindtap="goToEvaluate" data-id="{{item.id}}" data-taskid="{{item.taskId}}" data-title="{{item.title}}">评价雇主</button>
+      </view>
+
+      <view class="btn-group" wx:if="{{type === 'published' && item.status == 2}}">
+        <button class="btn-evaluate" bindtap="goToEvaluate" data-id="{{item.id}}" data-taskid="{{item.taskId}}" data-title="{{item.title}}">评价跑腿员</button>
+      </view>
+      
+      <text class="info" wx:if="{{type === 'published' && item.status >= 1 && item.runnerId}}">
+        👤 跑腿员ID: {{item.runnerId}}
+      </text>
+    </view>
+  </view>
+</view>

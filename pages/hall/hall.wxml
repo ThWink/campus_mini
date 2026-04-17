@@ -1,0 +1,48 @@
+<view class="container">
+  <view class="header">
+    <view class="header-left">
+      <text class="title">接单大厅</text>
+      <text class="subtitle">抢单赚零花</text>
+    </view>
+    <view class="header-right" bindtap="navToChat">
+      <text class="header-icon">🤖</text>
+    </view>
+  </view>
+
+  <view wx:if="{{isLoading}}" class="loading">
+    <text>加载中...</text>
+  </view>
+
+  <view wx:if="{{!isLoading && orderList.length === 0}}" class="empty">
+    <text class="empty-icon">📭</text>
+    <text class="empty-text">暂无待接订单</text>
+    <text class="empty-hint">快去发布任务吧~</text>
+  </view>
+
+  <view wx:if="{{!isLoading && orderList.length > 0}}" class="order-list">
+    <view class="order-card" wx:for="{{orderList}}" wx:key="id">
+      <view class="card-top">
+        <text class="order-type">[{{item.title || '跑腿'}}]</text>
+        <text class="order-price">￥{{item.reward || '0.00'}}</text>
+      </view>
+      
+      <view class="card-content">
+        <view class="info-row">
+          <text class="label">详情内容：</text>
+          <text class="text">{{item.description || '无详情'}}</text>
+        </view>
+        <view class="info-row">
+          <text class="label">发布时间：</text>
+          <text class="text">{{item.createTime || '刚刚'}}</text>
+        </view>
+      </view>
+
+      <view class="card-bottom">
+        <button class="accept-btn" 
+                bindtap="handleAcceptOrder" 
+                data-id="{{item.id}}" 
+                data-item="{{item}}">立即抢单</button>
+      </view>
+    </view>
+  </view>
+</view>
