@@ -14,6 +14,10 @@ public class Order {
 
     // --- 业务与联表字段 ---
     private Long publisherId; // 逻辑字段：对应发布任务的人
+    private String publisherName;
+    private String publisherPhone;
+    private String runnerName;
+    private String runnerPhone;
     private String title;
     private String description;
     private Double reward;

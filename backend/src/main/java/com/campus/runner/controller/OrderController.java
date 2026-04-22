@@ -30,6 +30,11 @@ public class OrderController {
         return Result.success(list);
     }
 
+    @GetMapping("/pending")
+    public Result<List<Order>> pending() {
+        return listPending();
+    }
+
     /**
      * 2. 抢单接口
      * POST http://localhost:8080/order/accept
@@ -45,6 +50,14 @@ public class OrderController {
         }
 
         // 调用 Service 层处理：修改订单状态为 1 (已接单)，写入 runnerId
+        return orderService.acceptOrder(orderId, runnerId);
+    }
+
+    @PutMapping("/accept")
+    public Result acceptByQuery(@RequestParam Long orderId, @RequestParam Long runnerId) {
+        if (orderId == null || runnerId == null) {
+            return Result.error(400, "订单ID或接单人ID不能为空");
+        }
         return orderService.acceptOrder(orderId, runnerId);
     }
 

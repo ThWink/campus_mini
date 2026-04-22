@@ -1,42 +1,22 @@
 package com.campus.runner.entity;
 
+import lombok.Data;
+
 import java.util.Date;
 
+@Data
 public class Comment {
     private Long id;
+    private Long orderId;
     private Long taskId;
+    private Long reviewerId;
+    private Long revieweeId;
     private Integer score;
     private String content;
+    private String tags;
+    private Date createTime;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getTaskId() {
-        return taskId;
-    }
-
-    public void setTaskId(Long taskId) {
-        this.taskId = taskId;
-    }
-
-    public Integer getScore() {
-        return score;
-    }
-
-    public void setScore(Integer score) {
-        this.score = score;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
+    private String orderTitle;
+    private String reviewerName;
+    private String revieweeName;
 }

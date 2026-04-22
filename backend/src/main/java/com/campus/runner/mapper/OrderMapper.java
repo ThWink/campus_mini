@@ -3,6 +3,7 @@ package com.campus.runner.mapper;
 import com.campus.runner.entity.Order;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Mapper
@@ -28,4 +29,7 @@ public interface OrderMapper {
 
     // 5. 🔴 新增：管理员更新订单状态
     int updateOrderStatus(@Param("orderId") Long orderId, @Param("status") Integer status);
+
+    List<Order> selectByCreateTimeRange(@Param("startTime") LocalDateTime startTime,
+                                        @Param("endTime") LocalDateTime endTime);
 }

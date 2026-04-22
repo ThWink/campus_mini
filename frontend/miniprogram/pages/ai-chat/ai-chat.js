@@ -6,7 +6,8 @@ Page({
     inputValue: '',
     messageList: [],
     isLoading: false,
-    scrollIntoView: ''
+    scrollIntoView: '',
+    showWelcome: true
   },
 
   onLoad() {
@@ -18,6 +19,7 @@ Page({
     if (history && history.length > 0) {
       this.setData({
         messageList: history,
+        showWelcome: this.isWelcomeOnly(history),
         scrollIntoView: `msg-${history.length - 1}`
       });
     } else {
@@ -26,9 +28,18 @@ Page({
         content: '你好！我是智能跑腿助手，有什么可以帮你的吗？比如：\n• 如何发布任务？\n• 如何接单？\n• 评价在哪里？'
       };
       this.setData({
-        messageList: [welcomeMsg]
+        messageList: [welcomeMsg],
+        showWelcome: true
       });
     }
+  },
+
+  isWelcomeOnly(list) {
+    return list.length === 0 || (
+      list.length === 1 &&
+      list[0].role === 'ai' &&
+      list[0].content.indexOf('你好') !== -1
+    );
   },
 
   saveHistory() {
@@ -47,7 +58,8 @@ Page({
       content: '你好！我是智能跑腿助手，有什么可以帮你的吗？比如：\n• 如何发布任务？\n• 如何接单？\n• 评价在哪里？'
     };
     this.setData({
-      messageList: [welcomeMsg]
+      messageList: [welcomeMsg],
+      showWelcome: true
     });
   },
 
@@ -66,14 +78,15 @@ Page({
     const userMsg = { role: 'user', content: content };
 
     this.setData({
-      messageList: [...this.data.messageList, userMsg],
+      messageList: this.data.messageList.concat(userMsg),
       inputValue: '',
+      showWelcome: false,
       scrollIntoView: `msg-${this.data.messageList.length - 1}`
     });
 
     const aiMsg = { role: 'ai', content: '' };
     this.setData({
-      messageList: [...this.data.messageList, aiMsg],
+      messageList: this.data.messageList.concat(aiMsg),
       isLoading: true,
       scrollIntoView: `msg-${this.data.messageList.length - 1}`
     });

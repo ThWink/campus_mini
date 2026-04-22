@@ -10,28 +10,61 @@
 
     <select id="getOrderById" resultType="com.campus.runner.entity.Order">
         SELECT
-            id,
-            user_id AS userId,
-            task_id AS taskId,
-            runner_id AS runnerId,
-            status
-        FROM orders
-        WHERE id = #{id}
+            o.id,
+            o.user_id AS userId,
+            o.task_id AS taskId,
+            o.runner_id AS runnerId,
+            o.user_id AS publisherId,
+            o.status,
+            o.create_time AS createTime,
+            t.title,
+            t.description,
+            t.reward
+        FROM orders o
+                 LEFT JOIN task t ON o.task_id = t.id
+        WHERE o.id = #{id}
     </select>
 
     <select id="selectAllOrders" resultType="com.campus.runner.entity.Order">
         SELECT
             o.id, o.user_id AS userId, o.task_id AS taskId, o.runner_id AS runnerId,
+            o.user_id AS publisherId,
             o.status, o.create_time AS createTime,
-            t.title, t.description, t.reward
+            t.title, t.description, t.reward,
+            publisher.username AS publisherName,
+            publisher.phone AS publisherPhone,
+            runner.username AS runnerName,
+            runner.phone AS runnerPhone
         FROM orders o
                  LEFT JOIN task t ON o.task_id = t.id
+                 LEFT JOIN user publisher ON o.user_id = publisher.id
+                 LEFT JOIN user runner ON o.runner_id = runner.id
         ORDER BY o.create_time DESC
+    </select>
+
+    <select id="selectByCreateTimeRange" resultType="com.campus.runner.entity.Order">
+        SELECT
+            o.id, o.user_id AS userId, o.task_id AS taskId, o.runner_id AS runnerId,
+            o.user_id AS publisherId,
+            o.status, o.create_time AS createTime,
+            t.title, t.description, t.reward,
+            publisher.username AS publisherName,
+            publisher.phone AS publisherPhone,
+            runner.username AS runnerName,
+            runner.phone AS runnerPhone
+        FROM orders o
+                 LEFT JOIN task t ON o.task_id = t.id
+                 LEFT JOIN user publisher ON o.user_id = publisher.id
+                 LEFT JOIN user runner ON o.runner_id = runner.id
+        WHERE o.create_time &gt;= #{startTime}
+          AND o.create_time &lt; #{endTime}
+        ORDER BY o.create_time ASC
     </select>
 
     <select id="selectPendingOrders" resultType="com.campus.runner.entity.Order">
         SELECT
-            o.id, o.user_id AS userId, o.task_id AS taskId, o.status, o.create_time AS createTime,
+            o.id, o.user_id AS userId, o.task_id AS taskId, o.user_id AS publisherId,
+            o.status, o.create_time AS createTime,
             t.title, t.description, t.reward
         FROM orders o
                  LEFT JOIN task t ON o.task_id = t.id
@@ -42,6 +75,7 @@
     <select id="selectByUserId" resultType="com.campus.runner.entity.Order">
         SELECT
             o.id, o.user_id AS userId, o.task_id AS taskId, o.runner_id AS runnerId,
+            o.user_id AS publisherId,
             o.status, o.create_time AS createTime,
             t.title, t.description, t.reward
         FROM orders o
@@ -53,6 +87,7 @@
     <select id="selectByRunnerId" resultType="com.campus.runner.entity.Order">
         SELECT
             o.id, o.user_id AS userId, o.task_id AS taskId, o.runner_id AS runnerId,
+            o.user_id AS publisherId,
             o.status, o.create_time AS createTime,
             t.title, t.description, t.reward
         FROM orders o

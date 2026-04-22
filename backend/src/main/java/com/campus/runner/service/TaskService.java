@@ -11,29 +11,57 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class TaskService {
+
     @Autowired
     private TaskMapper taskMapper;
+
     @Autowired
     private OrderMapper orderMapper;
 
     @Transactional(rollbackFor = Exception.class)
     public Result save(Task task) {
-        task.setStatus(0); // 设置任务为待接单
-        int rows = taskMapper.insert(task);
-
-        if (rows > 0) {
-            Order order = new Order();
-            // 这里把任务的发布者 ID 赋给 order 的 userId
-            order.setUserId(task.getPublisherId());
-            order.setTaskId(task.getId());
-            order.setStatus(0);
-
-            // 关键：这里可以调用 setPublisherId 存内存，但 Mapper 映射时不要去存数据库
-            order.setPublisherId(task.getPublisherId());
-
-            orderMapper.insert(order);
+        Result<Order> result = createTaskAndOrder(task);
+        if (result.getCode() == 200) {
             return Result.success("发布成功");
         }
-        return Result.fail("发布失败");
+        return Result.fail(result.getMsg());
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public Result<Order> publishForAgent(Long publisherId, String title, String description, Double reward) {
+        if (publisherId == null) {
+            return Result.error(400, "publisherId 不能为空");
+        }
+        if (title == null || title.trim().isEmpty()) {
+            return Result.error(400, "title 不能为空");
+        }
+        if (reward == null || reward < 0) {
+            return Result.error(400, "reward 不能小于 0");
+        }
+
+        Task task = new Task();
+        task.setPublisherId(publisherId);
+        task.setTitle(title.trim());
+        task.setDescription(description == null || description.trim().isEmpty() ? title.trim() : description.trim());
+        task.setReward(reward);
+        return createTaskAndOrder(task);
+    }
+
+    private Result<Order> createTaskAndOrder(Task task) {
+        task.setStatus(0);
+        int rows = taskMapper.insert(task);
+
+        if (rows <= 0) {
+            return Result.fail("发布失败");
+        }
+
+        Order order = new Order();
+        order.setUserId(task.getPublisherId());
+        order.setTaskId(task.getId());
+        order.setStatus(0);
+        order.setPublisherId(task.getPublisherId());
+
+        orderMapper.insert(order);
+        return Result.success("发布成功", orderMapper.getOrderById(order.getId()));
     }
 }

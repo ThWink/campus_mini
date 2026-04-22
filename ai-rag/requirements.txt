@@ -1,0 +1,17 @@
+langchain
+langchain-community
+langchain-huggingface
+langchain-openai
+chromadb
+pypdf
+python-dotenv
+playwright
+beautifulsoup4
+streamlit
+zhipuai
+httpx
+fastapi
+uvicorn
+langgraph
+langchain-chroma
+requests

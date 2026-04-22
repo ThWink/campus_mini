@@ -456,7 +456,7 @@ const banOrder = async (order) => {
 // 用户端相关方法
 const fetchPendingOrders = async () => {
   try {
-    const res = await request.get('/order/pending')
+    const res = await request.get('/order/listPending')
     pendingOrders.value = res || []
   } catch (error) {
     ElMessage.error('获取任务列表失败')
@@ -465,8 +465,7 @@ const fetchPendingOrders = async () => {
 
 const submitTask = async () => {
   try {
-    const task = await request.post('/task/create', { ...postForm.value, publisherId: user.value.id })
-    await request.post('/order/create', { taskId: task.id })
+    await request.post('/task/save', { ...postForm.value, publisherId: user.value.id })
     ElMessage.success('发布成功')
     showPostDialog.value = false
     fetchPendingOrders()
@@ -477,7 +476,7 @@ const submitTask = async () => {
 
 const acceptOrder = async (id) => {
   try {
-    await request.put(`/order/accept?orderId=${id}&runnerId=${user.value.id}`)
+    await request.post('/order/accept', { orderId: id, runnerId: user.value.id })
     ElMessage.success('抢单成功')
     fetchPendingOrders()
   } catch (error) {

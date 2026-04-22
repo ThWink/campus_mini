@@ -1,8 +1,7 @@
 <view class="container">
-  <view class="list-title">{{type === 'published' ? '📝 我发布的订单' : '🛵 我接取的任务'}}</view>
+  <view class="list-title">{{type === 'published' ? '我发布的订单' : '我接取的任务'}}</view>
 
   <view wx:if="{{orders.length === 0}}" class="empty">
-    <text class="empty-icon">📭</text>
     <text class="empty-text">暂无订单记录</text>
   </view>
 
@@ -17,33 +16,38 @@
         <text class="status-tag s0" wx:if="{{item.status == 0}}">待接单</text>
         <text class="status-tag s1" wx:if="{{item.status == 1}}">配送中</text>
         <text class="status-tag s2" wx:if="{{item.status == 2}}">已完成</text>
+        <text class="status-tag s3" wx:if="{{item.status == 3}}">已取消</text>
       </view>
     </view>
 
     <view class="item-body">
-      <view class="row"><text class="label">金额：</text><text class="value price">￥{{item.reward}}</text></view>
+      <view class="row"><text class="label">金额：</text><text class="value price">¥{{item.reward}}</text></view>
       <view class="row"><text class="label">详情：</text><text class="value">{{item.description}}</text></view>
     </view>
 
     <view class="item-footer">
       <view class="btn-group" wx:if="{{type === 'published' && item.status == 1}}">
-        <button class="btn-confirm" bindtap="handleComplete" data-id="{{item.id}}">确认收货</button>
+        <button class="btn-confirm" bindtap="handleComplete" data-id="{{item.id}}">确认完成</button>
       </view>
 
       <view class="btn-group" wx:if="{{type === 'accepted' && item.status == 1}}">
         <button class="btn-complete" bindtap="handleComplete" data-id="{{item.id}}">确认送达</button>
       </view>
 
-      <view class="btn-group" wx:if="{{type === 'accepted' && item.status == 2}}">
-        <button class="btn-evaluate" bindtap="goToEvaluate" data-id="{{item.id}}" data-taskid="{{item.taskId}}" data-title="{{item.title}}">评价雇主</button>
+      <view class="btn-group" wx:if="{{item.status == 2 && !item.evaluatedByMe}}">
+        <button class="btn-evaluate"
+                bindtap="goToEvaluate"
+                data-id="{{item.id}}"
+                data-taskid="{{item.taskId}}"
+                data-title="{{item.title}}">
+          {{type === 'published' ? '评价跑腿员' : '评价雇主'}}
+        </button>
       </view>
 
-      <view class="btn-group" wx:if="{{type === 'published' && item.status == 2}}">
-        <button class="btn-evaluate" bindtap="goToEvaluate" data-id="{{item.id}}" data-taskid="{{item.taskId}}" data-title="{{item.title}}">评价跑腿员</button>
-      </view>
-      
+      <text class="evaluated-info" wx:if="{{item.status == 2 && item.evaluatedByMe}}">已评价</text>
+
       <text class="info" wx:if="{{type === 'published' && item.status >= 1 && item.runnerId}}">
-        👤 跑腿员ID: {{item.runnerId}}
+        跑腿员ID：{{item.runnerId}}
       </text>
     </view>
   </view>

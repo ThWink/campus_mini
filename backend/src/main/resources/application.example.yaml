@@ -41,6 +41,20 @@ ai:
   service:
     url: ${AI_SERVICE_URL:http://127.0.0.1:8000}
 
+feishu:
+  sheet:
+    enabled: ${FEISHU_SHEET_ENABLED:false}
+    base-url: ${FEISHU_BASE_URL:https://open.feishu.cn}
+    app-id: ${FEISHU_APP_ID:}
+    app-secret: ${FEISHU_APP_SECRET:}
+    spreadsheet-token: ${FEISHU_SPREADSHEET_TOKEN:}
+    order-range: ${FEISHU_ORDER_RANGE:Sheet1!A:O}
+    user-range: ${FEISHU_USER_RANGE:Sheet1!A:G}
+    cron: "${FEISHU_SYNC_CRON:0 5 0 * * ?}"
+    zone: ${FEISHU_SYNC_ZONE:Asia/Shanghai}
+    sync-orders: ${FEISHU_SYNC_ORDERS:true}
+    sync-users: ${FEISHU_SYNC_USERS:true}
+
 logging:
   level:
     org.springframework.web: info

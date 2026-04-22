@@ -1,3 +1,37 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.local/
+/app.js
+__pycache__/
+*.pyc
+
+# WeChat DevTools private config
 project.private.config.json
 frontend/miniprogram/project.private.config.json
+
+# Local secrets and machine-specific config
+.env
+*.local
+ai-rag/.env
+deploy/env/*.env
+!deploy/env/*.env.example
+
+# Backend
+backend/target/
+
+# Web frontend
 frontend/web-client/node_modules/
+frontend/web-client/dist/
+frontend/web-client/*.log
+
+# AI / RAG
+ai-rag/.venv/
+ai-rag/logs/
+ai-rag/data/chroma_db/
+
+# Runtime artifacts
+*.log
+*.zip

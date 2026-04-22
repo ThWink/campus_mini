@@ -1,8 +1,10 @@
 package com.campus.runner.controller;
 
 import com.campus.runner.common.Result;
+import com.campus.runner.entity.Comment;
 import com.campus.runner.entity.Order;
 import com.campus.runner.entity.User;
+import com.campus.runner.mapper.CommentMapper;
 import com.campus.runner.service.OrderService;
 import com.campus.runner.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @CrossOrigin
@@ -29,6 +32,9 @@ public class AdminController {
 
     @Autowired
     private OrderService orderService;
+
+    @Autowired
+    private CommentMapper commentMapper;
 
     // 内存存储模拟订单数据
     private static List<Order> orders = new ArrayList<>();
@@ -101,25 +107,25 @@ public class AdminController {
     }
 
     @PostMapping("/updateUserRole")
-    public Result<?> updateUserRole(@RequestParam Long userId, @RequestParam String role) {
+    public Result<?> updateUserRole(@RequestBody Map<String, Object> params) {
+        Long userId = toLong(params.get("userId"));
+        String role = params.get("role") == null ? null : params.get("role").toString();
         if (userId == null || role == null) {
             return Result.error(400, "userId 和 role 不能为空");
         }
-        // TODO: 实现从数据库更新用户角色
-        return Result.success("更新成功");
+        boolean success = userService.updateUserRole(userId, role);
+        return success ? Result.success("更新成功") : Result.fail("用户不存在");
     }
 
     @PostMapping("/updateOrderStatus")
-    public Result<?> updateOrderStatus(@RequestParam Long orderId, @RequestParam Integer status) {
+    public Result<?> updateOrderStatus(@RequestBody Map<String, Object> params) {
+        Long orderId = toLong(params.get("orderId"));
+        Integer status = toInteger(params.get("status"));
         if (orderId == null || status == null) {
             return Result.error(400, "orderId 和 status 不能为空");
         }
-        Order order = orders.stream()
-                .filter(o -> o.getId().equals(orderId))
-                .findFirst()
-                .orElse(null);
-        if (order != null) {
-            order.setStatus(status);
+        int rows = orderService.updateOrderStatus(orderId, status);
+        if (rows > 0) {
             return Result.success("更新成功");
         } else {
             return Result.fail("订单不存在");
@@ -193,6 +199,53 @@ public class AdminController {
 
         public void setOrderId(Long orderId) {
             this.orderId = orderId;
+        }
+    }
+
+    @GetMapping("/comments")
+    public Result<List<Comment>> listComments() {
+        try {
+            return Result.success(commentMapper.selectAll());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.error(500, "获取评价列表失败: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/comments")
+    public Result<?> deleteComment(@RequestParam Long commentId) {
+        if (commentId == null) {
+            return Result.error(400, "commentId 不能为空");
+        }
+        int rows = commentMapper.deleteById(commentId);
+        return rows > 0 ? Result.success("删除成功") : Result.fail("评价不存在");
+    }
+
+    private Long toLong(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Number number) {
+            return number.longValue();
+        }
+        try {
+            return Long.parseLong(value.toString());
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private Integer toInteger(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Number number) {
+            return number.intValue();
+        }
+        try {
+            return Integer.parseInt(value.toString());
+        } catch (NumberFormatException e) {
+            return null;
         }
     }
 }

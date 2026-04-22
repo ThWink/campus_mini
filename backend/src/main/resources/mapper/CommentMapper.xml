@@ -5,20 +5,102 @@
 
 <mapper namespace="com.campus.runner.mapper.CommentMapper">
 
-    <insert id="insert" parameterType="com.campus.runner.entity.Comment">
-        INSERT INTO comment(task_id, score, content)
-        VALUES (#{taskId}, #{score}, #{content})
+    <sql id="commentColumns">
+        c.id,
+        c.order_id AS orderId,
+        c.task_id AS taskId,
+        c.reviewer_id AS reviewerId,
+        c.reviewee_id AS revieweeId,
+        c.score,
+        c.content,
+        c.tags,
+        c.create_time AS createTime,
+        t.title AS orderTitle,
+        reviewer.username AS reviewerName,
+        reviewee.username AS revieweeName
+    </sql>
+
+    <insert id="insert" parameterType="com.campus.runner.entity.Comment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO comment(order_id, task_id, reviewer_id, reviewee_id, score, content, tags, create_time)
+        VALUES (#{orderId}, #{taskId}, #{reviewerId}, #{revieweeId}, #{score}, #{content}, #{tags}, NOW())
     </insert>
 
-    <select id="selectByTaskId" resultType="com.campus.runner.entity.Comment">
-        SELECT id, task_id as taskId, score, content
+    <delete id="deleteById">
+        DELETE FROM comment
+        WHERE id = #{id}
+    </delete>
+
+    <select id="countByOrderAndReviewer" resultType="int">
+        SELECT COUNT(*)
         FROM comment
-        WHERE task_id = #{taskId}
+        WHERE order_id = #{orderId}
+          AND reviewer_id = #{reviewerId}
+    </select>
+
+    <select id="selectByOrderId" resultType="com.campus.runner.entity.Comment">
+        SELECT <include refid="commentColumns"/>
+        FROM comment c
+                 LEFT JOIN orders o ON c.order_id = o.id
+                 LEFT JOIN task t ON c.task_id = t.id
+                 LEFT JOIN user reviewer ON c.reviewer_id = reviewer.id
+                 LEFT JOIN user reviewee ON c.reviewee_id = reviewee.id
+        WHERE c.order_id = #{orderId}
+        ORDER BY c.create_time DESC
+    </select>
+
+    <select id="selectByTaskId" resultType="com.campus.runner.entity.Comment">
+        SELECT <include refid="commentColumns"/>
+        FROM comment c
+                 LEFT JOIN orders o ON c.order_id = o.id
+                 LEFT JOIN task t ON c.task_id = t.id
+                 LEFT JOIN user reviewer ON c.reviewer_id = reviewer.id
+                 LEFT JOIN user reviewee ON c.reviewee_id = reviewee.id
+        WHERE c.task_id = #{taskId}
+        ORDER BY c.create_time DESC
+    </select>
+
+    <select id="selectByReviewerId" resultType="com.campus.runner.entity.Comment">
+        SELECT <include refid="commentColumns"/>
+        FROM comment c
+                 LEFT JOIN orders o ON c.order_id = o.id
+                 LEFT JOIN task t ON c.task_id = t.id
+                 LEFT JOIN user reviewer ON c.reviewer_id = reviewer.id
+                 LEFT JOIN user reviewee ON c.reviewee_id = reviewee.id
+        WHERE c.reviewer_id = #{reviewerId}
+        ORDER BY c.create_time DESC
+    </select>
+
+    <select id="selectByRevieweeId" resultType="com.campus.runner.entity.Comment">
+        SELECT <include refid="commentColumns"/>
+        FROM comment c
+                 LEFT JOIN orders o ON c.order_id = o.id
+                 LEFT JOIN task t ON c.task_id = t.id
+                 LEFT JOIN user reviewer ON c.reviewer_id = reviewer.id
+                 LEFT JOIN user reviewee ON c.reviewee_id = reviewee.id
+        WHERE c.reviewee_id = #{revieweeId}
+        ORDER BY c.create_time DESC
     </select>
 
     <select id="selectAll" resultType="com.campus.runner.entity.Comment">
-        SELECT id, task_id as taskId, score, content
+        SELECT <include refid="commentColumns"/>
+        FROM comment c
+                 LEFT JOIN orders o ON c.order_id = o.id
+                 LEFT JOIN task t ON c.task_id = t.id
+                 LEFT JOIN user reviewer ON c.reviewer_id = reviewer.id
+                 LEFT JOIN user reviewee ON c.reviewee_id = reviewee.id
+        ORDER BY c.create_time DESC
+    </select>
+
+    <select id="averageScoreByRevieweeId" resultType="double">
+        SELECT COALESCE(AVG(score), 0)
         FROM comment
+        WHERE reviewee_id = #{revieweeId}
+    </select>
+
+    <select id="countByRevieweeId" resultType="int">
+        SELECT COUNT(*)
+        FROM comment
+        WHERE reviewee_id = #{revieweeId}
     </select>
 
 </mapper>

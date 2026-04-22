@@ -2,7 +2,7 @@ const app = getApp();
 
 Page({
   data: {
-    type: '', 
+    type: '',
     orders: []
   },
 
@@ -19,7 +19,7 @@ Page({
     const userId = wx.getStorageSync('userId');
     const isPublished = this.data.type === 'published';
     const url = isPublished ? '/order/myPublished' : '/order/myTasks';
-    const params = isPublished ? { userId: userId } : { runnerId: userId };
+    const params = isPublished ? { userId } : { runnerId: userId };
 
     wx.request({
       url: app.globalData.baseUrl + url,
@@ -27,9 +27,38 @@ Page({
       method: 'GET',
       success: (res) => {
         if (res.data.code === 200) {
-          this.setData({ orders: res.data.data });
+          const orders = (res.data.data || []).map(item => Object.assign({}, item, {
+            evaluatedByMe: false
+          }));
+          this.setData({ orders });
+          this.loadEvaluationStatus(orders, userId);
         }
       }
+    });
+  },
+
+  loadEvaluationStatus(orders, userId) {
+    if (!userId || !orders || orders.length === 0) return;
+    orders.forEach((order) => {
+      if (Number(order.status) !== 2) return;
+      wx.request({
+        url: app.globalData.baseUrl + `/comment/order/${order.id}`,
+        method: 'GET',
+        success: (res) => {
+          if (res.data.code === 200) {
+            const evaluated = (res.data.data || []).some(item => Number(item.reviewerId) === Number(userId));
+            if (evaluated) {
+              const next = this.data.orders.map(item => {
+                if (Number(item.id) === Number(order.id)) {
+                  return Object.assign({}, item, { evaluatedByMe: true });
+                }
+                return item;
+              });
+              this.setData({ orders: next });
+            }
+          }
+        }
+      });
     });
   },
 
@@ -38,11 +67,13 @@ Page({
     wx.request({
       url: app.globalData.baseUrl + '/order/complete',
       method: 'POST',
-      data: { orderId: orderId },
+      data: { orderId },
       success: (res) => {
         if (res.data.code === 200) {
           wx.showToast({ title: '操作成功', icon: 'success' });
           this.loadOrders();
+        } else {
+          wx.showToast({ title: res.data.msg || '操作失败', icon: 'none' });
         }
       }
     });
@@ -51,7 +82,7 @@ Page({
   goToEvaluate(e) {
     const orderId = e.currentTarget.dataset.id;
     const taskId = e.currentTarget.dataset.taskid;
-    const title = e.currentTarget.dataset.title;
+    const title = e.currentTarget.dataset.title || '订单评价';
     wx.navigateTo({
       url: `/pages/evaluate/evaluate?orderId=${orderId}&taskId=${taskId}&title=${encodeURIComponent(title)}`
     });

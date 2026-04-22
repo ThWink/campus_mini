@@ -16,6 +16,7 @@
 .s0 { color: #f39c12; background: #fef5e7; }
 .s1 { color: #3498db; background: #ebf5fb; }
 .s2 { color: #27ae60; background: #eafaf1; }
+.s3 { color: #909399; background: #f4f4f5; }
 
 .item-body { padding: 10rpx 0; }
 .row { display: flex; margin-bottom: 16rpx; }
@@ -36,4 +37,5 @@
 .btn-complete { background: #07c160; color: white; }
 .btn-confirm { background: #07c160; color: white; }
 .btn-evaluate { background: #ff9500; color: white; }
+.evaluated-info { font-size: 26rpx; color: #67c23a; background: #f0f9eb; border-radius: 28rpx; padding: 12rpx 24rpx; }
 .info { font-size: 24rpx; color: #999; width: 100%; padding-top: 10rpx; }

@@ -27,8 +27,18 @@ App({
     }
 
     // 3. 获取系统信息 (可选，用于做适配)
-    const systemInfo = wx.getSystemInfoSync();
-    this.globalData.systemInfo = systemInfo;
+    const deviceInfo = wx.getDeviceInfo ? wx.getDeviceInfo() : {};
+    const windowInfo = wx.getWindowInfo ? wx.getWindowInfo() : {};
+    const appBaseInfo = wx.getAppBaseInfo ? wx.getAppBaseInfo() : {};
+    const systemSetting = wx.getSystemSetting ? wx.getSystemSetting() : {};
+
+    this.globalData.systemInfo = Object.assign(
+      {},
+      deviceInfo,
+      windowInfo,
+      appBaseInfo,
+      systemSetting
+    );
   },
 
   /**

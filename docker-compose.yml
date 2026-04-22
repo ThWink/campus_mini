@@ -1,0 +1,84 @@
+services:
+  mariadb:
+    image: mariadb:11
+    container_name: campus-runner-mariadb
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-sc031215}
+      MYSQL_DATABASE: campus_runner
+      MYSQL_USER: runner
+      MYSQL_PASSWORD: ${DB_PASSWORD:-sc031215}
+      TZ: Asia/Shanghai
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./deploy/sql/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+
+  redis:
+    image: redis:7-alpine
+    container_name: campus-runner-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  backend:
+    build:
+      context: ./backend
+    container_name: campus-runner-backend
+    restart: unless-stopped
+    depends_on:
+      - mariadb
+      - redis
+      - ai-rag
+    environment:
+      DB_URL: jdbc:mysql://mariadb:3306/campus_runner?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      DB_USERNAME: runner
+      DB_PASSWORD: ${DB_PASSWORD:-sc031215}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      AI_SERVICE_URL: http://ai-rag:8000
+      FEISHU_SHEET_ENABLED: ${FEISHU_SHEET_ENABLED:-false}
+      FEISHU_APP_ID: ${FEISHU_APP_ID:-}
+      FEISHU_APP_SECRET: ${FEISHU_APP_SECRET:-}
+      FEISHU_SPREADSHEET_TOKEN: ${FEISHU_SPREADSHEET_TOKEN:-}
+      FEISHU_ORDER_RANGE: ${FEISHU_ORDER_RANGE:-Sheet1!A:O}
+      FEISHU_USER_RANGE: ${FEISHU_USER_RANGE:-Sheet1!A:G}
+      FEISHU_SYNC_CRON: "${FEISHU_SYNC_CRON:-0 5 0 * * ?}"
+      FEISHU_SYNC_ZONE: ${FEISHU_SYNC_ZONE:-Asia/Shanghai}
+      TZ: Asia/Shanghai
+    ports:
+      - "8080:8080"
+
+  ai-rag:
+    build:
+      context: ./ai-rag
+    container_name: campus-runner-ai-rag
+    restart: unless-stopped
+    environment:
+      CAMPUS_API_BASE: http://backend:8080
+      ZHIPUAI_API_KEY: ${ZHIPUAI_API_KEY:-}
+      GLM_API_KEY: ${GLM_API_KEY:-}
+      GLM_BASE_URL: ${GLM_BASE_URL:-https://open.bigmodel.cn/api/paas/v4/}
+      GLM_MODEL: ${GLM_MODEL:-glm-4}
+      BGE_RERANKER_URL: ${BGE_RERANKER_URL:-}
+      TZ: Asia/Shanghai
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./ai-rag/data:/app/data
+      - ai_rag_logs:/app/logs
+
+  web:
+    build:
+      context: ./frontend/web-client
+    container_name: campus-runner-web
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+volumes:
+  mariadb_data:
+  ai_rag_logs:
