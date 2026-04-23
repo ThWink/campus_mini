@@ -7,12 +7,21 @@
   <view class="form-box">
     <view class="input-item">
       <text class="label">账号</text>
-      <input class="input" model:value="{{username}}" placeholder="请输入用户名" placeholder-class="placeholder" />
+      <input class="input"
+             value="{{username}}"
+             placeholder="请输入用户名"
+             placeholder-class="placeholder"
+             bindinput="onUsernameInput" />
     </view>
     
     <view class="input-item">
       <text class="label">密码</text>
-      <input class="input" model:value="{{password}}" password placeholder="请输入密码" placeholder-class="placeholder" />
+      <input class="input"
+             value="{{password}}"
+             password
+             placeholder="请输入密码"
+             placeholder-class="placeholder"
+             bindinput="onPasswordInput" />
     </view>
 
     <button class="login-btn" bindtap="handleLogin">立即登录</button>

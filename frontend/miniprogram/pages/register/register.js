@@ -8,6 +8,22 @@ Page({
     confirmPassword: ''
   },
 
+  onUsernameInput(e) {
+    this.setData({ username: e.detail.value });
+  },
+
+  onPhoneInput(e) {
+    this.setData({ phone: e.detail.value });
+  },
+
+  onPasswordInput(e) {
+    this.setData({ password: e.detail.value });
+  },
+
+  onConfirmPasswordInput(e) {
+    this.setData({ confirmPassword: e.detail.value });
+  },
+
   handleRegister() {
     const { username, phone, password, confirmPassword } = this.data;
 

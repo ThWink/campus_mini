@@ -6,6 +6,14 @@ Page({
     password: ''
   },
 
+  onUsernameInput(e) {
+    this.setData({ username: e.detail.value });
+  },
+
+  onPasswordInput(e) {
+    this.setData({ password: e.detail.value });
+  },
+
   // 登录处理
   handleLogin() {
     const { username, password } = this.data;

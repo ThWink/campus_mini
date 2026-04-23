@@ -7,22 +7,22 @@
   <view class="form-box">
     <view class="input-item">
       <text class="label">用户名</text>
-      <input class="input" model:value="{{username}}" placeholder="设置登录账号" />
+      <input class="input" value="{{username}}" placeholder="设置登录账号" bindinput="onUsernameInput" />
     </view>
     
     <view class="input-item">
       <text class="label">手机号</text>
-      <input class="input" type="number" model:value="{{phone}}" placeholder="请输入手机号" />
+      <input class="input" type="number" value="{{phone}}" placeholder="请输入手机号" bindinput="onPhoneInput" />
     </view>
 
     <view class="input-item">
       <text class="label">设置密码</text>
-      <input class="input" password model:value="{{password}}" placeholder="请输入密码" />
+      <input class="input" password value="{{password}}" placeholder="请输入密码" bindinput="onPasswordInput" />
     </view>
 
     <view class="input-item">
       <text class="label">确认密码</text>
-      <input class="input" password model:value="{{confirmPassword}}" placeholder="请再次输入密码" />
+      <input class="input" password value="{{confirmPassword}}" placeholder="请再次输入密码" bindinput="onConfirmPasswordInput" />
     </view>
 
     <button class="register-btn" bindtap="handleRegister">立即注册</button>
