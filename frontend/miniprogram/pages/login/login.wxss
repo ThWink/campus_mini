@@ -1,10 +1,10 @@
 .login-container {
   min-height: 100vh;
   background-color: #fff;
-  padding: 100rpx 60rpx;
+  padding: 140rpx 60rpx 60rpx;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  box-sizing: border-box;
 }
 
 .header {
@@ -28,7 +28,7 @@
 }
 
 .form-box {
-  flex: 1;
+  width: 100%;
 }
 
 .input-item {
@@ -36,6 +36,9 @@
   border-bottom: 2rpx solid #f0f0f0;
   padding: 16rpx 0;
   transition: border-color 0.3s;
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .input-item:focus-within {
@@ -51,8 +54,15 @@
 
 .input {
   height: 80rpx;
+  width: 100%;
   font-size: 32rpx;
   color: #333;
+  display: block;
+  position: relative;
+  box-sizing: border-box;
+  pointer-events: auto;
+  background-color: #fff;
+  line-height: 80rpx;
 }
 
 .placeholder {
