@@ -93,7 +93,7 @@ Page({
 
     const that = this;
     const task = wx.request({
-      url: 'http://localhost:8080/api/ai/ask',
+      url: app.globalData.baseUrl + '/api/ai/ask',
       method: 'POST',
       responseType: 'text',
       enableChunked: true,
