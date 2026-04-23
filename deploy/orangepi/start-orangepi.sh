@@ -5,6 +5,7 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 BACKEND_DIR="$PROJECT_ROOT/backend"
 AI_DIR="$PROJECT_ROOT/ai-rag"
 WEB_DIR="$PROJECT_ROOT/frontend/web-client"
+LOCAL_SQLITE_LIB="${LOCAL_SQLITE_LIB:-/usr/local/sqlite/lib}"
 
 BACKEND_ENV="$PROJECT_ROOT/deploy/env/backend.env"
 AI_ENV="$AI_DIR/.env"
@@ -25,6 +26,10 @@ wait_port() {
 }
 
 mkdir -p "$BACKEND_DIR/target" "$AI_DIR/logs"
+
+if [ -d "$LOCAL_SQLITE_LIB" ]; then
+  export LD_LIBRARY_PATH="$LOCAL_SQLITE_LIB:${LD_LIBRARY_PATH:-}"
+fi
 
 if [ -f "$BACKEND_ENV" ]; then
   set -a
