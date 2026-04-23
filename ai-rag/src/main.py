@@ -9,6 +9,10 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
+from sqlite_compat import patch_sqlite_for_chroma
+
+patch_sqlite_for_chroma()
+
 import requests
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request

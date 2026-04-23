@@ -70,8 +70,8 @@ echo "Preparing AI/RAG service..."
 cd "$AI_DIR"
 if [ ! -x ".venv/bin/python" ]; then
   python3 -m venv .venv
-  .venv/bin/python -m pip install --upgrade pip
-  .venv/bin/python -m pip install -r requirements.txt
+  .venv/bin/python -m pip install --upgrade pip -i "${PIP_INDEX_URL:-https://pypi.tuna.tsinghua.edu.cn/simple}"
+  .venv/bin/python -m pip install -r requirements.txt -i "${PIP_INDEX_URL:-https://pypi.tuna.tsinghua.edu.cn/simple}"
 fi
 
 if ! ss -ltn | grep -q ':8000 '; then

@@ -4,6 +4,10 @@ import shutil
 import sys
 from pathlib import Path
 
+from sqlite_compat import patch_sqlite_for_chroma
+
+patch_sqlite_for_chroma()
+
 from dotenv import load_dotenv
 from langchain_chroma import Chroma
 from langchain_community.document_loaders import TextLoader

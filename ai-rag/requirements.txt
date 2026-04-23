@@ -5,6 +5,7 @@ langchain-openai
 chromadb
 pypdf
 python-dotenv
+pysqlite3-binary
 playwright
 beautifulsoup4
 streamlit
