@@ -50,12 +50,6 @@ docker pull docker.m.daocloud.io/python:3.11-slim
 docker pull docker.m.daocloud.io/node:22-alpine
 docker pull docker.m.daocloud.io/nginx:1.27-alpine
 
-docker tag docker.m.daocloud.io/eclipse-temurin:17-jdk-alpine campus-runner-base-eclipse-temurin-jdk:17-jdk-alpine
-docker tag docker.m.daocloud.io/eclipse-temurin:17-jre-alpine campus-runner-base-eclipse-temurin-jre:17-jre-alpine
-docker tag docker.m.daocloud.io/python:3.11-slim campus-runner-base-python:3.11-slim
-docker tag docker.m.daocloud.io/node:22-alpine campus-runner-base-node:22-alpine
-docker tag docker.m.daocloud.io/nginx:1.27-alpine campus-runner-base-nginx:1.27-alpine
-
 docker build -t campus-runner-backend "$PROJECT_ROOT/backend"
 
 echo "Building ai-rag image..."
