@@ -1,4 +1,4 @@
-FROM docker.m.daocloud.io/python:3.11-slim
+FROM campus-runner-base-python:3.11-slim
 
 WORKDIR /app
 
