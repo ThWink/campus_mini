@@ -58,7 +58,7 @@ SafetyAgent -> RouterAgent -> OrderAgent / TaskAgent / RuleAgent / ChatAgent
 %USERPROFILE%\.campus-runner\mariadb
 ```
 
-首次运行会从清华镜像下载 MariaDB，并自动创建 `campus_runner` 数据库、`runner/sc031215` 用户和基础表。
+首次运行会从清华镜像下载 MariaDB，并自动创建 `campus_runner` 数据库、 用户和基础表。
 
 后端本地私有配置文件为：
 
@@ -112,16 +112,16 @@ source deploy/sql/schema.sql;
 ```text
 host: 127.0.0.1
 port: 3306
-database: campus_runner
-username: runner
-password: sc031215
+database: 
+username: 
+password: 
 ```
 
 开发账号：
 
-- 管理员：`admin / sc031215`
-- 普通用户：`user1 / user1`
-- 普通用户：`user2 / user2`
+- 管理员：
+- 普通用户：
+- 普通用户：
 
 ## 微信小程序
 
