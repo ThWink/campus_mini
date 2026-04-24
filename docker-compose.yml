@@ -62,7 +62,7 @@ services:
       FEISHU_SYNC_ZONE: ${FEISHU_SYNC_ZONE:-Asia/Shanghai}
       TZ: ${TZ:-Asia/Shanghai}
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/actuator/health >/dev/null 2>&1 || exit 1"]
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/actuator/health/readiness >/dev/null 2>&1 || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 10
