@@ -1,0 +1,93 @@
+name: cd-docker-orangepi
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/**"
+      - "ai-rag/**"
+      - "frontend/web-client/**"
+      - "deploy/**"
+      - "docker-compose.yml"
+      - ".github/workflows/cd-docker-orangepi.yml"
+      - ".github/workflows/ci.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: cd-docker-orangepi
+  cancel-in-progress: true
+
+env:
+  DEPLOY_PORT: ${{ vars.ORANGEPI_PORT || '22' }}
+  DEPLOY_PATH: ${{ vars.ORANGEPI_APP_DIR || '/home/orangepi/apps/campus-runner' }}
+  RELEASE_ARCHIVE: campus-runner-release.tar.gz
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Package release
+        run: |
+          tar \
+            --exclude=.git \
+            --exclude=.github/java-upgrade \
+            --exclude=backend/target \
+            --exclude=frontend/web-client/node_modules \
+            --exclude=frontend/web-client/dist \
+            --exclude=ai-rag/.venv \
+            --exclude=ai-rag/logs \
+            --exclude=ai-rag/data/chroma_db \
+            --exclude=.local \
+            --exclude=*.log \
+            -czf "$RELEASE_ARCHIVE" \
+            backend \
+            frontend \
+            ai-rag \
+            deploy \
+            docs \
+            docker-compose.yml \
+            README.md
+
+      - name: Upload release archive
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.ORANGEPI_HOST }}
+          username: ${{ secrets.ORANGEPI_USER }}
+          key: ${{ secrets.ORANGEPI_SSH_KEY }}
+          port: ${{ env.DEPLOY_PORT }}
+          source: ${{ env.RELEASE_ARCHIVE }}
+          target: /tmp
+
+      - name: Deploy on Orange Pi
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.ORANGEPI_HOST }}
+          username: ${{ secrets.ORANGEPI_USER }}
+          key: ${{ secrets.ORANGEPI_SSH_KEY }}
+          port: ${{ env.DEPLOY_PORT }}
+          script: |
+            set -euo pipefail
+
+            APP_DIR="${{ env.DEPLOY_PATH }}"
+            RELEASE_DIR="$APP_DIR/releases/${{ github.sha }}"
+            SHARED_DIR="$APP_DIR/shared"
+            CURRENT_LINK="$APP_DIR/current"
+
+            mkdir -p "$RELEASE_DIR" "$SHARED_DIR"
+
+            tar -xzf "/tmp/${{ env.RELEASE_ARCHIVE }}" -C "$RELEASE_DIR"
+
+            if [ ! -f "$SHARED_DIR/docker.env" ]; then
+              cp "$RELEASE_DIR/deploy/env/docker.env.example" "$SHARED_DIR/docker.env"
+            fi
+
+            ln -sfn "$RELEASE_DIR" "$CURRENT_LINK"
+
+            cd "$CURRENT_LINK"
+            bash deploy/orangepi/deploy-docker.sh "$SHARED_DIR/docker.env"
+
+            rm -f "/tmp/${{ env.RELEASE_ARCHIVE }}"
