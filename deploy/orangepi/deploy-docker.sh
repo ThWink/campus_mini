@@ -43,6 +43,15 @@ EOF
 docker info >/dev/null
 
 echo "Building backend image..."
+DOCKER_CONFIG="${DOCKER_CONFIG:-$HOME/.docker-headless}"
+export DOCKER_CONFIG
+export DOCKER_BUILDKIT=0
+export COMPOSE_DOCKER_CLI_BUILD=0
+
+docker pull eclipse-temurin:17-jdk-alpine
+docker pull eclipse-temurin:17-jre-alpine
+docker pull python:3.11-slim
+
 docker build -t campus-runner-backend "$PROJECT_ROOT/backend"
 
 echo "Building ai-rag image..."
