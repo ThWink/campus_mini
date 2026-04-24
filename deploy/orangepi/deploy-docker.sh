@@ -4,19 +4,15 @@ set -euo pipefail
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 ENV_FILE="${1:-$PROJECT_ROOT/deploy/env/docker.env}"
 COMPOSE_FILE="$PROJECT_ROOT/docker-compose.yml"
+DOCKER_CONFIG="${DOCKER_CONFIG:-$HOME/.docker-headless}"
+export DOCKER_CONFIG
+export DOCKER_BUILDKIT=0
+export COMPOSE_DOCKER_CLI_BUILD=0
 
 compose() {
   if docker compose version >/dev/null 2>&1; then
-    DOCKER_CONFIG="${DOCKER_CONFIG:-$HOME/.docker-headless}"
-    export DOCKER_CONFIG
-    export DOCKER_BUILDKIT=0
-    export COMPOSE_DOCKER_CLI_BUILD=0
     docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" "$@"
   elif command -v docker-compose >/dev/null 2>&1; then
-    DOCKER_CONFIG="${DOCKER_CONFIG:-$HOME/.docker-headless}"
-    export DOCKER_CONFIG
-    export DOCKER_BUILDKIT=0
-    export COMPOSE_DOCKER_CLI_BUILD=0
     docker-compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" "$@"
   else
     echo "ERROR: docker compose is not available." >&2
@@ -33,8 +29,8 @@ fi
 echo "Using env file: $ENV_FILE"
 echo "Project root : $PROJECT_ROOT"
 
-mkdir -p "${DOCKER_CONFIG:-$HOME/.docker-headless}"
-cat > "${DOCKER_CONFIG:-$HOME/.docker-headless}/config.json" <<'EOF'
+mkdir -p "$DOCKER_CONFIG"
+cat > "$DOCKER_CONFIG/config.json" <<'EOF'
 {
   "auths": {}
 }
