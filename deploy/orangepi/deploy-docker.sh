@@ -7,8 +7,16 @@ COMPOSE_FILE="$PROJECT_ROOT/docker-compose.yml"
 
 compose() {
   if docker compose version >/dev/null 2>&1; then
+    DOCKER_CONFIG="${DOCKER_CONFIG:-$HOME/.docker-headless}"
+    export DOCKER_CONFIG
+    export DOCKER_BUILDKIT=0
+    export COMPOSE_DOCKER_CLI_BUILD=0
     docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" "$@"
   elif command -v docker-compose >/dev/null 2>&1; then
+    DOCKER_CONFIG="${DOCKER_CONFIG:-$HOME/.docker-headless}"
+    export DOCKER_CONFIG
+    export DOCKER_BUILDKIT=0
+    export COMPOSE_DOCKER_CLI_BUILD=0
     docker-compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" "$@"
   else
     echo "ERROR: docker compose is not available." >&2
@@ -25,10 +33,26 @@ fi
 echo "Using env file: $ENV_FILE"
 echo "Project root : $PROJECT_ROOT"
 
+mkdir -p "${DOCKER_CONFIG:-$HOME/.docker-headless}"
+cat > "${DOCKER_CONFIG:-$HOME/.docker-headless}/config.json" <<'EOF'
+{
+  "auths": {}
+}
+EOF
+
 docker info >/dev/null
 
-echo "Building and starting containers..."
-compose up -d --build
+echo "Building backend image..."
+docker build -t campus-runner-backend "$PROJECT_ROOT/backend"
+
+echo "Building ai-rag image..."
+docker build -t campus-runner-ai-rag "$PROJECT_ROOT/ai-rag"
+
+echo "Building web image..."
+docker build -t campus-runner-web "$PROJECT_ROOT/frontend/web-client"
+
+echo "Starting containers..."
+compose up -d --no-build
 
 echo "Checking ChromaDB index..."
 if compose exec -T ai-rag sh -c 'test -f /app/data/chroma_db/chroma.sqlite3'; then
