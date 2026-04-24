@@ -39,13 +39,8 @@ EOF
 docker info >/dev/null
 
 echo "Building backend image..."
-DOCKER_CONFIG="${DOCKER_CONFIG:-$HOME/.docker-headless}"
-export DOCKER_CONFIG
-export DOCKER_BUILDKIT=0
-export COMPOSE_DOCKER_CLI_BUILD=0
-
-docker pull docker.m.daocloud.io/eclipse-temurin:17-jdk-alpine
-docker pull docker.m.daocloud.io/eclipse-temurin:17-jre-alpine
+docker pull docker.m.daocloud.io/eclipse-temurin:17-jdk
+docker pull docker.m.daocloud.io/eclipse-temurin:17-jre
 docker pull docker.m.daocloud.io/python:3.11-slim
 docker pull docker.m.daocloud.io/node:22-alpine
 docker pull docker.m.daocloud.io/nginx:1.27-alpine
