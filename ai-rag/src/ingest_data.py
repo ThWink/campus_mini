@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 import os
-import shutil
 import sys
 from pathlib import Path
 
 from sqlite_compat import patch_sqlite_for_chroma
+from storage_utils import reset_directory_contents
 
 patch_sqlite_for_chroma()
 
@@ -65,9 +65,7 @@ def main():
     embeddings = get_embeddings()
     print("[3/4] embedding model ready")
 
-    if CHROMA_DB_PATH.exists():
-        shutil.rmtree(CHROMA_DB_PATH)
-    CHROMA_DB_PATH.mkdir(parents=True, exist_ok=True)
+    reset_directory_contents(CHROMA_DB_PATH)
 
     db = None
     for i in range(0, len(chunks), BATCH_SIZE):
