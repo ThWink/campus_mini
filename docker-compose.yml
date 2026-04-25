@@ -46,6 +46,9 @@ services:
       DB_URL: jdbc:mysql://mariadb:3306/${MYSQL_DATABASE:-campus_runner}?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
       DB_USERNAME: ${DB_USERNAME:-runner}
       DB_PASSWORD: ${DB_PASSWORD:-change-me}
+      SPRING_DATASOURCE_URL: jdbc:mysql://mariadb:3306/${MYSQL_DATABASE:-campus_runner}?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME:-runner}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-change-me}
       SPRING_SQL_INIT_MODE: ${SPRING_SQL_INIT_MODE:-never}
       REDIS_HOST: redis
       REDIS_PORT: 6379
