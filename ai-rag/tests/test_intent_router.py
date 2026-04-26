@@ -16,6 +16,11 @@ class IntentRouterTests(unittest.TestCase):
 
         self.assertEqual(classify_intent("寝室可以使用大功率电器吗"), "rule_qa")
 
+    def test_exam_cheating_consequence_is_rule_qa(self):
+        from intent_router import classify_intent
+
+        self.assertEqual(classify_intent("考试作弊会怎么处理"), "rule_qa")
+
     def test_punishment_follow_up_uses_previous_rule_topic(self):
         from conversation_context import build_contextual_query
         from intent_router import classify_intent
