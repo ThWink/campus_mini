@@ -18,6 +18,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
+from intent_router import classify_intent, extract_order_id, is_publish_intent
 from langchain_chroma import Chroma
 from langchain_core.messages import HumanMessage
 from langchain_core.tools import tool
@@ -129,46 +130,7 @@ def safety_check(message: str) -> Optional[str]:
 
 
 def route_intent(message: str) -> Intent:
-    text = message.strip()
-    if not text:
-        return Intent.CHAT
-
-    if is_publish_intent(text):
-        return Intent.TASK_PUBLISH
-
-    if extract_order_id(text):
-        return Intent.ORDER_STATUS
-
-    order_keywords = ["我的订单", "订单状态", "订单进度", "查订单", "我发布的订单", "我接的单", "我接取的订单", "待完成订单"]
-    if any(keyword in text for keyword in order_keywords):
-        return Intent.ORDER_LIST
-
-    rule_keywords = ["学校", "校园", "规则", "制度", "规定", "宿舍", "寝室", "大功率", "电动车", "请假", "处分", "图书馆"]
-    if any(keyword in text for keyword in rule_keywords):
-        return Intent.RULE_QA
-
-    return Intent.CHAT
-
-
-def is_publish_intent(text: str) -> bool:
-    if any(word in text for word in ["怎么", "如何", "在哪", "流程", "教程"]):
-        return False
-    return any(word in text for word in ["帮我发", "帮我发布", "发布一个", "发一个", "下单", "叫个跑腿", "创建跑腿"])
-
-
-def extract_order_id(message: str) -> Optional[str]:
-    patterns = [
-        r"订单\s*号?\s*#?(\d+)",
-        r"单号\s*#?(\d+)",
-        r"查\s*(\d+)\s*号",
-        r"(\d+)\s*号订单",
-        r"order\s*#?(\d+)",
-    ]
-    for pattern in patterns:
-        match = re.search(pattern, message, re.IGNORECASE)
-        if match:
-            return match.group(1)
-    return None
+    return Intent(classify_intent(message))
 
 
 def status_name(status: Any) -> str:
