@@ -10,9 +10,8 @@ patch_sqlite_for_chroma()
 
 from dotenv import load_dotenv
 from langchain_chroma import Chroma
-from langchain_community.document_loaders import TextLoader
 from langchain_openai import OpenAIEmbeddings
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from rule_chunking import build_rule_documents
 
 load_dotenv()
 
@@ -46,20 +45,15 @@ def main():
         print(f"[ERROR] raw data file not found: {RAW_DATA_PATH}")
         sys.exit(1)
 
-    loader = TextLoader(str(RAW_DATA_PATH), encoding="utf-8")
-    documents = loader.load()
-    total_chars = sum(len(doc.page_content) for doc in documents)
-    print(f"[1/4] loaded {len(documents)} document(s), {total_chars} chars")
+    raw_text = RAW_DATA_PATH.read_text(encoding="utf-8")
+    print(f"[1/4] loaded raw rules, {len(raw_text)} chars")
 
-    splitter = RecursiveCharacterTextSplitter(
+    chunks = build_rule_documents(
+        raw_text,
+        source=str(RAW_DATA_PATH),
         chunk_size=CHUNK_SIZE,
         chunk_overlap=CHUNK_OVERLAP,
-        length_function=len,
     )
-    chunks = splitter.split_documents(documents)
-    for index, chunk in enumerate(chunks):
-        chunk.metadata["chunk_index"] = index
-        chunk.metadata["source"] = str(RAW_DATA_PATH)
     print(f"[2/4] split into {len(chunks)} chunks")
 
     embeddings = get_embeddings()

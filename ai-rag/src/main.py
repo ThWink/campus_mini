@@ -24,14 +24,20 @@ from langchain_core.messages import HumanMessage
 from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from conversation_context import build_contextual_query, format_history
+from hybrid_retrieval import hybrid_rank
+from prompts import build_chat_prompt, build_rule_prompt
 from response_texts import NO_RULE_DOCS_REPLY
+from rule_chunking import build_rule_documents
 
 load_dotenv()
 
 CAMPUS_API_BASE = os.getenv("CAMPUS_API_BASE", "http://127.0.0.1:8080").rstrip("/")
 CHROMA_DB_PATH = Path(os.getenv("CHROMA_DB_PATH", "data/chroma_db"))
+RAW_DATA_PATH = Path(os.getenv("RAG_RAW_DATA_PATH", "data/raw/jxau_real_rules.txt"))
 SEARCH_K = int(os.getenv("RAG_SEARCH_K", "10"))
 RAG_TOP_N = int(os.getenv("RAG_TOP_N", "3"))
+RAG_CHUNK_SIZE = int(os.getenv("RAG_CHUNK_SIZE", "500"))
+RAG_CHUNK_OVERLAP = int(os.getenv("RAG_CHUNK_OVERLAP", "80"))
 BGE_RERANKER_URL = os.getenv("BGE_RERANKER_URL", "").strip()
 LOG_PATH = Path(os.getenv("AGENT_LOG_PATH", "logs/agent_events.jsonl"))
 
@@ -320,6 +326,7 @@ def get_embeddings():
 
 
 _retriever = None
+_keyword_docs = None
 
 
 def get_retriever():
@@ -339,12 +346,41 @@ def get_retriever():
         return None
 
 
+def get_keyword_docs() -> List[Any]:
+    global _keyword_docs
+    if _keyword_docs is not None:
+        return _keyword_docs
+
+    if not RAW_DATA_PATH.exists():
+        _keyword_docs = []
+        return _keyword_docs
+
+    try:
+        raw_text = RAW_DATA_PATH.read_text(encoding="utf-8")
+        _keyword_docs = build_rule_documents(
+            raw_text,
+            source=str(RAW_DATA_PATH),
+            chunk_size=RAG_CHUNK_SIZE,
+            chunk_overlap=RAG_CHUNK_OVERLAP,
+        )
+        return _keyword_docs
+    except Exception as exc:
+        print(f"[WARN] failed to initialize keyword docs: {exc}")
+        _keyword_docs = []
+        return _keyword_docs
+
+
 def rerank_documents(query: str, docs: List[Any]) -> List[Tuple[Any, Optional[float]]]:
+    return rerank_ranked_documents(query, [(doc, None) for doc in docs])
+
+
+def rerank_ranked_documents(query: str, ranked_docs: List[Tuple[Any, Optional[float]]]) -> List[Tuple[Any, Optional[float]]]:
+    docs = [doc for doc, _ in ranked_docs]
     if not docs:
         return []
 
     if not BGE_RERANKER_URL:
-        return [(doc, None) for doc in docs[:RAG_TOP_N]]
+        return ranked_docs[:RAG_TOP_N]
 
     try:
         payload = {"query": query, "documents": [doc.page_content for doc in docs]}
@@ -369,15 +405,26 @@ def rerank_documents(query: str, docs: List[Any]) -> List[Tuple[Any, Optional[fl
 
 def retrieve_rule_docs(query: str) -> List[Tuple[Any, Optional[float]]]:
     retriever = get_retriever()
-    if retriever is None:
+    vector_ranked: List[Tuple[Any, Optional[float]]] = []
+
+    if retriever is not None:
+        try:
+            vector_ranked = [(doc, None) for doc in retriever.invoke(query)]
+        except Exception as exc:
+            print(f"[WARN] RAG retrieve failed: {exc}")
+
+    keyword_docs = get_keyword_docs()
+    if not vector_ranked and not keyword_docs:
         return []
 
-    try:
-        docs = retriever.invoke(query)
-        return rerank_documents(query, docs)
-    except Exception as exc:
-        print(f"[WARN] RAG retrieve failed: {exc}")
-        return []
+    candidates = hybrid_rank(
+        query=query,
+        vector_ranked=vector_ranked,
+        keyword_docs=keyword_docs,
+        top_n=max(SEARCH_K, RAG_TOP_N),
+        keyword_limit=SEARCH_K,
+    )
+    return rerank_ranked_documents(query, candidates)
 
 
 def citation_from_doc(doc: Any, score: Optional[float]) -> Citation:
@@ -405,27 +452,23 @@ def rule_agent(state: AgentState) -> str:
     contextual_query = build_contextual_query(state.message, state.history)
     docs = retrieve_rule_docs(contextual_query)
     state.citations = [citation_from_doc(doc, score) for doc, score in docs]
-    state.tool_calls.append({"tool": "chroma_retrieval", "top_k": SEARCH_K, "reranker": bool(BGE_RERANKER_URL)})
+    state.tool_calls.append({
+        "tool": "hybrid_retrieval",
+        "top_k": SEARCH_K,
+        "top_n": RAG_TOP_N,
+        "keyword_docs": len(get_keyword_docs()),
+        "reranker": bool(BGE_RERANKER_URL),
+    })
 
     if not docs:
         return NO_RULE_DOCS_REPLY
 
     context = "\n\n".join(f"[来源{idx}] {doc.page_content}" for idx, (doc, _) in enumerate(docs, start=1))
-    prompt = f"""你是校园跑腿系统的规则问答 Agent。请只基于下面的校园规则片段回答用户问题。
-
-用户问题：{state.message}
-
-最近对话：
-{format_history(state.history) or "无"}
-
-校园规则片段：
-{context}
-
-要求：
-1. 如果片段能回答，给出明确结论。
-2. 如果片段不能回答，不要编造规定。
-3. 回答末尾简短标注使用了哪些来源编号。
-"""
+    prompt = build_rule_prompt(
+        user_message=state.message,
+        history_text=format_history(state.history) or "无",
+        context=context,
+    )
     try:
         result = get_llm().invoke([HumanMessage(content=prompt)]).content
     except Exception as exc:
@@ -436,14 +479,10 @@ def rule_agent(state: AgentState) -> str:
 
 
 def chat_agent(state: AgentState) -> str:
-    prompt = f"""你是校园跑腿系统的智能助手。
-请简洁回答用户问题。不要编造订单状态、学校规定或系统未实现的能力。
-
-最近对话：
-{format_history(state.history) or "无"}
-
-用户问题：{state.message}
-"""
+    prompt = build_chat_prompt(
+        user_message=state.message,
+        history_text=format_history(state.history) or "无",
+    )
     try:
         return get_llm().invoke([HumanMessage(content=prompt)]).content
     except Exception:

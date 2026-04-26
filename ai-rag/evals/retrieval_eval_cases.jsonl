@@ -1,0 +1,2 @@
+{"name":"major_change","query":"学生可以申请转专业吗","must_retrieve":["转专业","申请"],"category":"学籍管理"}
+{"name":"exam_cheating","query":"考试作弊会怎么处理","must_retrieve":["作弊","违纪"],"category":"考试管理"}
