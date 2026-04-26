@@ -7,12 +7,17 @@ from sqlite_compat import patch_sqlite_for_chroma
 patch_sqlite_for_chroma()
 
 from dotenv import load_dotenv
-from langchain_openai import OpenAIEmbeddings
 from langchain_chroma import Chroma
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
+from embedding_config import (
+    MISSING_EMBEDDING_CONFIG_MESSAGE,
+    create_embeddings,
+    describe_embedding_settings,
+    resolve_embedding_settings,
+)
 
 load_dotenv()
 
@@ -41,16 +46,13 @@ def setup_vector_store():
     print("=" * 60)
 
     print(f"\n[初始化] 加载向量数据库: {CHROMA_DB_PATH}")
-    api_key = os.environ.get("ZHIPUAI_API_KEY")
-    if not api_key:
-        print("  [错误] .env 文件中未找到 ZHIPUAI_API_KEY")
+    settings = resolve_embedding_settings()
+    if settings is None:
+        print(f"  [错误] {MISSING_EMBEDDING_CONFIG_MESSAGE}")
         sys.exit(1)
 
-    embeddings = OpenAIEmbeddings(
-        openai_api_key=api_key,
-        openai_api_base="https://open.bigmodel.cn/api/paas/v4/",
-        model="embedding-3"
-    )
+    print(f"  [配置] {describe_embedding_settings(settings)}")
+    embeddings = create_embeddings(settings)
     db = Chroma(persist_directory=str(CHROMA_DB_PATH), embedding_function=embeddings)
     retriever = db.as_retriever(search_kwargs={"k": SEARCH_K})
     print(f"  [成功] 向量库加载完成，检索返回 top-{SEARCH_K} 个相关片段")

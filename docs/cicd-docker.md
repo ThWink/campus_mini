@@ -34,8 +34,15 @@ cp deploy/env/docker.env.example deploy/env/docker.env
 ```text
 MYSQL_ROOT_PASSWORD
 DB_PASSWORD
-ZHIPUAI_API_KEY
+EMBEDDING_API_KEY
 GLM_API_KEY
+```
+
+如果使用 SCNet/Qwen3 embedding，推荐同时配置：
+
+```text
+EMBEDDING_BASE_URL=https://api.scnet.cn/api/llm/v1
+EMBEDDING_MODEL=Qwen3-Embedding-8B
 ```
 
 如果服务器 80/8080/8000 端口被占用，可以改：
@@ -57,7 +64,7 @@ bash deploy/orangepi/deploy-docker.sh
 1. 读取 `deploy/env/docker.env`
 2. 执行 `docker compose up -d --build`
 3. 检查 ChromaDB 索引是否存在
-4. 如果索引不存在且配置了 `ZHIPUAI_API_KEY`，自动执行 `python src/ingest_data.py`
+4. 如果索引不存在且配置了 `EMBEDDING_API_KEY`、`SCNET_API_KEY` 或 `ZHIPUAI_API_KEY`，自动执行 `python src/ingest_data.py`
 
 ### 1.4 容器说明
 

@@ -22,8 +22,14 @@ from intent_router import classify_intent, extract_order_id, is_publish_intent
 from langchain_chroma import Chroma
 from langchain_core.messages import HumanMessage
 from langchain_core.tools import tool
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_openai import ChatOpenAI
 from conversation_context import build_contextual_query, format_history
+from embedding_config import (
+    MISSING_EMBEDDING_CONFIG_MESSAGE,
+    create_embeddings,
+    describe_embedding_settings,
+    resolve_embedding_settings,
+)
 from hybrid_retrieval import hybrid_rank
 from prompts import build_chat_prompt, build_rule_prompt
 from response_texts import NO_RULE_DOCS_REPLY
@@ -325,16 +331,13 @@ def get_llm():
 
 
 def get_embeddings():
-    api_key = os.getenv("ZHIPUAI_API_KEY")
-    if not api_key:
-        print("[WARN] ZHIPUAI_API_KEY is not set; RAG retrieval is disabled.")
+    settings = resolve_embedding_settings()
+    if settings is None:
+        print(f"[WARN] {MISSING_EMBEDDING_CONFIG_MESSAGE} RAG vector retrieval is disabled.")
         return None
 
-    return OpenAIEmbeddings(
-        openai_api_key=api_key,
-        openai_api_base="https://open.bigmodel.cn/api/paas/v4/",
-        model="embedding-3",
-    )
+    print(f"[INFO] embedding provider: {describe_embedding_settings(settings)}")
+    return create_embeddings(settings)
 
 
 _retriever = None
@@ -555,6 +558,7 @@ async def root():
         "version": "2.0.0",
         "state_machine": ["SafetyAgent", "RouterAgent", "OrderAgent", "TaskAgent", "RuleAgent", "ChatAgent"],
         "endpoints": {"chat": "POST /chat", "health": "GET /health"},
+        "embedding": describe_embedding_settings(resolve_embedding_settings()),
         "reranker": "enabled" if BGE_RERANKER_URL else "disabled",
     }
 

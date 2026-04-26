@@ -10,7 +10,12 @@ patch_sqlite_for_chroma()
 
 from dotenv import load_dotenv
 from langchain_chroma import Chroma
-from langchain_openai import OpenAIEmbeddings
+from embedding_config import (
+    MISSING_EMBEDDING_CONFIG_MESSAGE,
+    create_embeddings,
+    describe_embedding_settings,
+    resolve_embedding_settings,
+)
 from rule_chunking import build_rule_documents
 
 load_dotenv()
@@ -24,16 +29,13 @@ BATCH_SIZE = int(os.getenv("RAG_INGEST_BATCH_SIZE", "16"))
 
 
 def get_embeddings():
-    api_key = os.environ.get("ZHIPUAI_API_KEY")
-    if not api_key:
-        print("[ERROR] ZHIPUAI_API_KEY is missing in .env")
+    settings = resolve_embedding_settings()
+    if settings is None:
+        print(f"[ERROR] {MISSING_EMBEDDING_CONFIG_MESSAGE}")
         sys.exit(1)
 
-    return OpenAIEmbeddings(
-        openai_api_key=api_key,
-        openai_api_base="https://open.bigmodel.cn/api/paas/v4/",
-        model="embedding-3",
-    )
+    print(f"[INFO] embedding provider: {describe_embedding_settings(settings)}")
+    return create_embeddings(settings)
 
 
 def main():

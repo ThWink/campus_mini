@@ -37,11 +37,20 @@ cp deploy/env/ai-rag.env.example .env
 按需填写：
 
 ```text
-ZHIPUAI_API_KEY=
+EMBEDDING_API_KEY=
+EMBEDDING_BASE_URL=https://api.scnet.cn/api/llm/v1
+EMBEDDING_MODEL=Qwen3-Embedding-8B
 GLM_API_KEY=
 GLM_BASE_URL=
 GLM_MODEL=
 BGE_RERANKER_URL=
+```
+
+也可以不填 `EMBEDDING_API_KEY`，改填兼容变量：
+
+```text
+SCNET_API_KEY=
+ZHIPUAI_API_KEY=
 ```
 
 启动：

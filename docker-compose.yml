@@ -80,6 +80,10 @@ services:
     restart: unless-stopped
     environment:
       CAMPUS_API_BASE: http://backend:8080
+      EMBEDDING_API_KEY: ${EMBEDDING_API_KEY:-}
+      EMBEDDING_BASE_URL: ${EMBEDDING_BASE_URL:-}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-}
+      SCNET_API_KEY: ${SCNET_API_KEY:-}
       ZHIPUAI_API_KEY: ${ZHIPUAI_API_KEY:-}
       GLM_API_KEY: ${GLM_API_KEY:-}
       GLM_BASE_URL: ${GLM_BASE_URL:-https://open.bigmodel.cn/api/paas/v4/}

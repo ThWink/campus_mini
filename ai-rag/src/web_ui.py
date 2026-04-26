@@ -2,12 +2,16 @@ import os
 import streamlit as st
 from pathlib import Path
 from dotenv import load_dotenv
-from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import Chroma
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
+from embedding_config import (
+    MISSING_EMBEDDING_CONFIG_MESSAGE,
+    create_embeddings,
+    resolve_embedding_settings,
+)
 
 load_dotenv()
 
@@ -32,14 +36,10 @@ SYSTEM_PROMPT = """你是校园跑腿系统的智能助手，专门帮助用户�
 
 @st.cache_resource
 def setup_vector_store():
-    api_key = os.environ.get("ZHIPUAI_API_KEY")
-    if not api_key:
-        raise ValueError("未找到 ZHIPUAI_API_KEY")
-    embeddings = OpenAIEmbeddings(
-        openai_api_key=api_key,
-        openai_api_base="https://open.bigmodel.cn/api/paas/v4/",
-        model="embedding-3"
-    )
+    settings = resolve_embedding_settings()
+    if settings is None:
+        raise ValueError(MISSING_EMBEDDING_CONFIG_MESSAGE)
+    embeddings = create_embeddings(settings)
     db = Chroma(persist_directory=str(CHROMA_DB_PATH), embedding_function=embeddings)
     retriever = db.as_retriever(search_kwargs={"k": SEARCH_K})
     return retriever

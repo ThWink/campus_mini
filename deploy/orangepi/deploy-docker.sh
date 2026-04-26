@@ -63,11 +63,11 @@ echo "Checking ChromaDB index..."
 if compose exec -T ai-rag sh -c 'test -f /app/data/chroma_db/chroma.sqlite3'; then
   echo "ChromaDB index already exists."
 else
-  if compose exec -T ai-rag sh -c 'test -n "$ZHIPUAI_API_KEY"'; then
+  if compose exec -T ai-rag sh -c 'test -n "$EMBEDDING_API_KEY$SCNET_API_KEY$ZHIPUAI_API_KEY"'; then
     echo "No ChromaDB index found. Running ingest..."
     compose exec -T ai-rag python src/ingest_data.py
   else
-    echo "WARN: ZHIPUAI_API_KEY is empty. Skip ingest_data.py. Rule RAG will stay unavailable until index is built."
+    echo "WARN: embedding API key is empty. Skip ingest_data.py. Rule RAG will stay unavailable until index is built."
   fi
 fi
 
