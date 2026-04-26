@@ -16,8 +16,9 @@
     "navigationBarTextStyle": "black"
   },
   "tabBar": {
+    "custom": true,
     "color": "#999999",
-    "selectedColor": "#07c160",
+    "selectedColor": "#111111",
     "backgroundColor": "#ffffff",
     "borderStyle": "black",
     "list": [
@@ -28,6 +29,14 @@
       {
         "pagePath": "pages/publish/publish",
         "text": "发布任务"
+      },
+      {
+        "pagePath": "pages/ai-chat/ai-chat",
+        "text": "AI"
+      },
+      {
+        "pagePath": "pages/orderList/orderList",
+        "text": "订单"
       },
       {
         "pagePath": "pages/user/user",
