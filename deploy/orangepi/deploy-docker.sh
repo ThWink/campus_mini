@@ -53,8 +53,11 @@ docker build -t campus-runner-ai-rag "$PROJECT_ROOT/ai-rag"
 echo "Building web image..."
 docker build -t campus-runner-web "$PROJECT_ROOT/frontend/web-client"
 
-echo "Starting containers..."
-compose up -d --no-build
+echo "Starting data containers..."
+compose up -d --no-build mariadb redis
+
+echo "Recreating application containers..."
+compose up -d --no-build --force-recreate --no-deps ai-rag backend web
 
 echo "Checking ChromaDB index..."
 if compose exec -T ai-rag sh -c 'test -f /app/data/chroma_db/chroma.sqlite3'; then
