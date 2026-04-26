@@ -296,7 +296,7 @@ def publish_runner_task(user_id: str, title: str, description: str, reward: floa
 
 def order_agent(state: AgentState) -> str:
     contextual_query = build_contextual_query(state.message, state.history)
-    order_id = extract_order_id(contextual_query)
+    order_id = extract_order_id(state.message)
     if order_id:
         state.tool_calls.append({"tool": "get_order_status", "order_id": order_id})
         return get_order_status.invoke({"order_id": order_id, "user_id": state.user_id or ""})
