@@ -40,6 +40,7 @@ cp deploy/env/ai-rag.env.example .env
 EMBEDDING_API_KEY=
 EMBEDDING_BASE_URL=https://api.scnet.cn/api/llm/v1
 EMBEDDING_MODEL=Qwen3-Embedding-8B
+EMBEDDING_BATCH_SIZE=5
 GLM_API_KEY=
 GLM_BASE_URL=
 GLM_MODEL=

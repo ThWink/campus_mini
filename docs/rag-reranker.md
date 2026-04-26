@@ -29,6 +29,7 @@ OpenAIEmbeddings(
     openai_api_key=os.environ.get("EMBEDDING_API_KEY") or os.environ.get("SCNET_API_KEY"),
     openai_api_base="https://api.scnet.cn/api/llm/v1",
     model="Qwen3-Embedding-8B",
+    chunk_size=5,
 )
 ```
 
@@ -45,6 +46,7 @@ POST https://api.scnet.cn/api/llm/v1/embeddings
 - `EMBEDDING_API_KEY`: 推荐使用的通用 embedding API Key。
 - `EMBEDDING_BASE_URL`: embedding OpenAI-compatible base URL。SCNet 默认为 `https://api.scnet.cn/api/llm/v1`。
 - `EMBEDDING_MODEL`: embedding 模型名。SCNet 当前使用 `Qwen3-Embedding-8B`。
+- `EMBEDDING_BATCH_SIZE`: 每次请求 embedding 接口的文本条数。SCNet 当前限制最多 5 条，建议填 `5`。
 - `SCNET_API_KEY`: SCNet API Key。缺失时无法生成向量，ChromaDB 向量召回不可用。
 - `ZHIPUAI_API_KEY`: 旧配置兼容变量。如果不填新变量，代码仍可继续使用智谱 `embedding-3`。
 - `CHROMA_DB_PATH`: ChromaDB 持久化目录，Docker 中默认为 `/app/data/chroma_db`。

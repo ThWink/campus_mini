@@ -43,6 +43,7 @@ GLM_API_KEY
 ```text
 EMBEDDING_BASE_URL=https://api.scnet.cn/api/llm/v1
 EMBEDDING_MODEL=Qwen3-Embedding-8B
+EMBEDDING_BATCH_SIZE=5
 ```
 
 如果服务器 80/8080/8000 端口被占用，可以改：

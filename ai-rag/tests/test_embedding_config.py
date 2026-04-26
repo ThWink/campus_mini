@@ -15,18 +15,21 @@ class EmbeddingConfigTests(unittest.TestCase):
         self.assertEqual(settings.api_key_source, "SCNET_API_KEY")
         self.assertEqual(settings.base_url, "https://api.scnet.cn/api/llm/v1")
         self.assertEqual(settings.model, "Qwen3-Embedding-8B")
+        self.assertEqual(settings.request_batch_size, 5)
 
     def test_generic_embedding_env_overrides_provider_defaults(self):
         settings = resolve_embedding_settings({
             "EMBEDDING_API_KEY": "sk-test",
             "EMBEDDING_BASE_URL": "https://example.com/v1",
             "EMBEDDING_MODEL": "custom-embedding",
+            "EMBEDDING_BATCH_SIZE": "7",
         })
 
         self.assertEqual(settings.api_key, "sk-test")
         self.assertEqual(settings.api_key_source, "EMBEDDING_API_KEY")
         self.assertEqual(settings.base_url, "https://example.com/v1")
         self.assertEqual(settings.model, "custom-embedding")
+        self.assertEqual(settings.request_batch_size, 7)
 
     def test_zhipu_key_keeps_old_embedding_defaults(self):
         settings = resolve_embedding_settings({"ZHIPUAI_API_KEY": "zhipu-test"})
@@ -35,6 +38,7 @@ class EmbeddingConfigTests(unittest.TestCase):
         self.assertEqual(settings.api_key_source, "ZHIPUAI_API_KEY")
         self.assertEqual(settings.base_url, "https://open.bigmodel.cn/api/paas/v4/")
         self.assertEqual(settings.model, "embedding-3")
+        self.assertEqual(settings.request_batch_size, 1000)
 
     def test_zhipu_fallback_ignores_generic_scnet_defaults_without_generic_key(self):
         settings = resolve_embedding_settings({
