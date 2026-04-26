@@ -22,6 +22,7 @@ from langchain_chroma import Chroma
 from langchain_core.messages import HumanMessage
 from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from conversation_context import build_contextual_query, format_history
 from response_texts import NO_RULE_DOCS_REPLY
 
 load_dotenv()
@@ -294,17 +295,18 @@ def publish_runner_task(user_id: str, title: str, description: str, reward: floa
 
 
 def order_agent(state: AgentState) -> str:
-    order_id = extract_order_id(state.message)
+    contextual_query = build_contextual_query(state.message, state.history)
+    order_id = extract_order_id(contextual_query)
     if order_id:
         state.tool_calls.append({"tool": "get_order_status", "order_id": order_id})
         return get_order_status.invoke({"order_id": order_id, "user_id": state.user_id or ""})
 
     scope = "all"
-    if any(word in state.message for word in ["待完成", "未完成", "还没完成"]):
+    if any(word in contextual_query for word in ["待完成", "未完成", "还没完成"]):
         scope = "todo"
-    elif "发布" in state.message:
+    elif "发布" in contextual_query:
         scope = "published"
-    elif any(word in state.message for word in ["接取", "接的单", "我接"]):
+    elif any(word in contextual_query for word in ["接取", "接的单", "我接"]):
         scope = "accepted"
 
     state.tool_calls.append({"tool": "get_my_orders", "scope": scope})
@@ -438,7 +440,8 @@ def append_citations(answer: str, citations: List[Citation]) -> str:
 
 
 def rule_agent(state: AgentState) -> str:
-    docs = retrieve_rule_docs(state.message)
+    contextual_query = build_contextual_query(state.message, state.history)
+    docs = retrieve_rule_docs(contextual_query)
     state.citations = [citation_from_doc(doc, score) for doc, score in docs]
     state.tool_calls.append({"tool": "chroma_retrieval", "top_k": SEARCH_K, "reranker": bool(BGE_RERANKER_URL)})
 
@@ -449,6 +452,9 @@ def rule_agent(state: AgentState) -> str:
     prompt = f"""你是校园跑腿系统的规则问答 Agent。请只基于下面的校园规则片段回答用户问题。
 
 用户问题：{state.message}
+
+最近对话：
+{format_history(state.history) or "无"}
 
 校园规则片段：
 {context}
@@ -471,6 +477,9 @@ def chat_agent(state: AgentState) -> str:
     prompt = f"""你是校园跑腿系统的智能助手。
 请简洁回答用户问题。不要编造订单状态、学校规定或系统未实现的能力。
 
+最近对话：
+{format_history(state.history) or "无"}
+
 用户问题：{state.message}
 """
     try:
@@ -486,7 +495,8 @@ def run_state_machine(state: AgentState) -> str:
         state.blocked_reason = risk
         return risk
 
-    state.intent = route_intent(state.message)
+    contextual_query = build_contextual_query(state.message, state.history)
+    state.intent = route_intent(contextual_query)
     if state.intent == Intent.ORDER_STATUS or state.intent == Intent.ORDER_LIST:
         return order_agent(state)
     if state.intent == Intent.TASK_PUBLISH:

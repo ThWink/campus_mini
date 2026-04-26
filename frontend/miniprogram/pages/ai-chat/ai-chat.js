@@ -72,11 +72,24 @@ Page({
     });
   },
 
+  buildRequestHistory(list) {
+    return (list || [])
+      .filter(item => item && (item.role === 'user' || item.role === 'ai'))
+      .filter(item => item.content && item.content.trim())
+      .filter(item => !(item.role === 'ai' && item.content.indexOf('你好！我是智能跑腿助手') !== -1))
+      .slice(-8)
+      .map(item => ({
+        role: item.role,
+        content: item.content
+      }));
+  },
+
   sendMessage() {
     const content = this.data.inputValue.trim();
     if (!content || this.data.isLoading) return;
 
     const userId = wx.getStorageSync('userId') || app.globalData.userId;
+    const requestHistory = this.buildRequestHistory(this.data.messageList);
 
     const userMsg = { role: 'user', content: content };
 
@@ -108,7 +121,8 @@ Page({
       },
       data: {
         user_id: userId,
-        message: content
+        message: content,
+        history: requestHistory
       },
       success: (res) => {
         if (!this.receivedStream && typeof res.data === 'string') {
