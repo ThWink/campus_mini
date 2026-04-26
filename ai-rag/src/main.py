@@ -22,6 +22,7 @@ from langchain_chroma import Chroma
 from langchain_core.messages import HumanMessage
 from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from response_texts import NO_RULE_DOCS_REPLY
 
 load_dotenv()
 
@@ -442,7 +443,7 @@ def rule_agent(state: AgentState) -> str:
     state.tool_calls.append({"tool": "chroma_retrieval", "top_k": SEARCH_K, "reranker": bool(BGE_RERANKER_URL)})
 
     if not docs:
-        return "我暂时没有检索到相关校园规则片段，建议换个更具体的问题，或者补充规则文档后重新构建向量库。"
+        return NO_RULE_DOCS_REPLY
 
     context = "\n\n".join(f"[来源{idx}] {doc.page_content}" for idx, (doc, _) in enumerate(docs, start=1))
     prompt = f"""你是校园跑腿系统的规则问答 Agent。请只基于下面的校园规则片段回答用户问题。
