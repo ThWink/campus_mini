@@ -55,6 +55,16 @@ RISK_PATTERNS = [
     "毒品", "管制刀具", "危险品", "违禁品", "代签",
 ]
 
+RISK_ACTION_WORDS = [
+    "帮我", "发布", "发一个", "下单", "代", "买", "出售", "组织",
+    "提供", "安排", "接", "做", "想要", "我要",
+]
+
+RISK_INFO_WORDS = [
+    "怎么处理", "会怎么处理", "后果", "处分", "处罚", "规定", "校规",
+    "会不会", "会被", "算不算", "如何处理",
+]
+
 
 class Intent(str, Enum):
     ORDER_STATUS = "order_status"
@@ -131,6 +141,8 @@ def safety_check(message: str) -> Optional[str]:
     lowered = message.lower()
     for pattern in RISK_PATTERNS:
         if pattern.lower() in lowered:
+            if any(word in message for word in RISK_INFO_WORDS) and not any(word in message for word in RISK_ACTION_WORDS):
+                return None
             return f"这个请求包含风险内容：{pattern}。平台不能发布或协助处理这类任务。"
     return None
 
