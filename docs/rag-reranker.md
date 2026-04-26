@@ -53,6 +53,7 @@ POST https://api.scnet.cn/api/llm/v1/embeddings
 - `RAG_RAW_DATA_PATH`: 原始校园规则文本路径，Docker 中默认为 `/app/data/raw/jxau_real_rules.txt`。
 - `RAG_CHUNK_SIZE`: 文档切块大小。
 - `RAG_CHUNK_OVERLAP`: 文档切块重叠长度。
+- `RAG_INGEST_BATCH_DELAY`: 入库时每批 embedding 请求之间的等待秒数。遇到 429 限流时可设置为 `3` 到 `5`。
 
 不要把真实 `sk-...` API Key 写进仓库文档或代码。应写入服务器环境变量、`shared/docker.env` 或 GitHub Actions Secret。
 

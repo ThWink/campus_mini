@@ -96,6 +96,7 @@ services:
       RAG_TOP_N: ${RAG_TOP_N:-3}
       RAG_CHUNK_SIZE: ${RAG_CHUNK_SIZE:-200}
       RAG_CHUNK_OVERLAP: ${RAG_CHUNK_OVERLAP:-30}
+      RAG_INGEST_BATCH_DELAY: ${RAG_INGEST_BATCH_DELAY:-}
       AGENT_LOG_PATH: /app/logs/agent_events.jsonl
       TZ: ${TZ:-Asia/Shanghai}
     healthcheck:

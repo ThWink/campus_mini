@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
+import time
 from pathlib import Path
 
 from sqlite_compat import patch_sqlite_for_chroma
@@ -26,6 +27,7 @@ CHROMA_DB_PATH = Path(os.getenv("CHROMA_DB_PATH", "data/chroma_db"))
 CHUNK_SIZE = int(os.getenv("RAG_CHUNK_SIZE", "200"))
 CHUNK_OVERLAP = int(os.getenv("RAG_CHUNK_OVERLAP", "30"))
 BATCH_SIZE = int(os.getenv("RAG_INGEST_BATCH_SIZE", "16"))
+BATCH_DELAY = float(os.getenv("RAG_INGEST_BATCH_DELAY", "0"))
 
 
 def get_embeddings():
@@ -75,6 +77,8 @@ def main():
         else:
             db.add_documents(batch)
         print(f"[4/4] indexed {min(i + BATCH_SIZE, len(chunks))}/{len(chunks)}")
+        if BATCH_DELAY > 0 and i + BATCH_SIZE < len(chunks):
+            time.sleep(BATCH_DELAY)
 
     print("=" * 60)
     print(f"done: {len(chunks)} chunks persisted to {CHROMA_DB_PATH}")
